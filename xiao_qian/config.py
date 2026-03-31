@@ -8,6 +8,7 @@ API Key Registry
 ----------------
 KEY_XIAO_QIAN  → 小千核心對話引擎 (OpenAI / 自定義 LLM 端點)
 KEY_CRAWLER    → 小千專屬爬蟲/知識資料庫服務
+KEY_SECURITY   → 絕對防護模組 (HMAC 簽署共享密鑰)
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ from typing import Optional
 # ---------------------------------------------------------------------------
 KEY_XIAO_QIAN: str = "XIAO_QIAN_API_KEY"   # 🔑 小千對話引擎鑰匙
 KEY_CRAWLER:   str = "CRAWLER_API_KEY"      # 🔑 知識爬蟲服務鑰匙
+KEY_SECURITY:  str = "SECURITY_API_KEY"     # 🔑 絕對防護模組鑰匙
 
 
 @dataclass
@@ -40,6 +42,12 @@ class Config:
     # 🔑 知識爬蟲服務 API 金鑰 (環境變數: CRAWLER_API_KEY)
     crawler_api_key: Optional[str] = field(
         default_factory=lambda: os.environ.get(KEY_CRAWLER)
+    )
+
+    # 🔑 絕對防護模組 API 金鑰 (環境變數: SECURITY_API_KEY)
+    # 作為 HMAC-SHA256 簽署的共享密鑰，保護所有請求的完整性。
+    security_api_key: Optional[str] = field(
+        default_factory=lambda: os.environ.get(KEY_SECURITY)
     )
 
     # 對話引擎端點 (預設使用 OpenAI，可替換為本地 LLM)
@@ -64,6 +72,8 @@ class Config:
             missing.append(KEY_XIAO_QIAN)
         if not self.crawler_api_key:
             missing.append(KEY_CRAWLER)
+        if not self.security_api_key:
+            missing.append(KEY_SECURITY)
         if missing:
             raise ValueError(
                 f"缺少必要的 API 金鑰，請設定以下環境變數: {', '.join(missing)}"

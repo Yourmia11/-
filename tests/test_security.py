@@ -118,3 +118,23 @@ class TestSecurityGuard:
         guard.process("first", caller_id="testuser")
         with pytest.raises(PermissionError):
             guard.process("second", caller_id="testuser")
+
+    def test_api_key_used_as_hmac_secret(self):
+        """SecurityGuard 應將 api_key 作為 HMAC 共享密鑰傳遞給 TokenAuthenticator。"""
+        guard = SecurityGuard(api_key="sec-shared-secret")
+        token = guard.authenticator.generate_token("hello")
+        assert guard.authenticator.verify_token("hello", token) is True
+
+    def test_api_key_none_still_works(self):
+        """未設定 api_key 時，SecurityGuard 應自動使用隨機密鑰，功能仍正常。"""
+        guard = SecurityGuard(api_key=None)
+        token = guard.authenticator.generate_token("world")
+        assert guard.authenticator.verify_token("world", token) is True
+
+    def test_different_api_keys_produce_different_tokens(self):
+        """不同 api_key 應產生不同的 HMAC 令牌。"""
+        guard_a = SecurityGuard(api_key="key-aaa")
+        guard_b = SecurityGuard(api_key="key-bbb")
+        token_a = guard_a.authenticator.generate_token("payload")
+        token_b = guard_b.authenticator.generate_token("payload")
+        assert token_a != token_b

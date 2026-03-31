@@ -117,20 +117,29 @@ class SecurityGuard:
     """
     絕對防護主類別：整合限速、消毒、驗證三層防護。
 
+    api_key 對應 🔑 SECURITY_API_KEY，作為 HMAC-SHA256 的共享密鑰。
+    若未提供，系統將自動產生隨機密鑰（僅適合開發/測試環境）。
+
     使用方式：
-        guard = SecurityGuard()
+        guard = SecurityGuard(api_key="sec-...")
         safe_input = guard.process(raw_user_input, caller_id="user_123")
     """
 
     def __init__(
         self,
-        rate_limiter:  Optional[RateLimiter]       = None,
-        sanitizer:     Optional[InputSanitizer]    = None,
-        authenticator: Optional[TokenAuthenticator]= None,
+        rate_limiter:  Optional[RateLimiter]        = None,
+        sanitizer:     Optional[InputSanitizer]     = None,
+        authenticator: Optional[TokenAuthenticator] = None,
+        api_key:       Optional[str]                = None,  # 🔑 SECURITY_API_KEY
     ) -> None:
         self.rate_limiter  = rate_limiter  or RateLimiter()
         self.sanitizer     = sanitizer     or InputSanitizer()
-        self.authenticator = authenticator or TokenAuthenticator()
+        # api_key 作為 HMAC 共享密鑰；未設定時自動產生隨機密鑰
+        self.authenticator = authenticator or TokenAuthenticator(secret=api_key)
+        if api_key is None:
+            logger.warning(
+                "[Security] SECURITY_API_KEY 未設定，使用隨機暫時密鑰（建議正式環境設定）。"
+            )
 
     def check_rate_limit(self, caller_id: str) -> None:
         """若超限，拋出 PermissionError。"""

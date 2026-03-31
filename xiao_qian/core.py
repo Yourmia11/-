@@ -124,6 +124,7 @@ class XiaoQian:
         config = Config(
             xiao_qian_api_key="sk-...",   # 🔑 XIAO_QIAN_API_KEY
             crawler_api_key="craw-...",   # 🔑 CRAWLER_API_KEY
+            security_api_key="sec-...",   # 🔑 SECURITY_API_KEY
         )
         xq = XiaoQian(config=config)
         print(xq.chat("幫我分析今天的工作進度"))
@@ -137,7 +138,9 @@ class XiaoQian:
         personality: Optional[Personality]    = None,
     ) -> None:
         self.config      = config      or default_config
-        self.security    = security    or SecurityGuard()
+        self.security    = security    or SecurityGuard(
+            api_key=self.config.security_api_key,  # 🔑 SECURITY_API_KEY
+        )
         self.crawler     = crawler     or KnowledgeCrawler(
             db=KnowledgeDB(self.config.db_uri),
             api_key=self.config.crawler_api_key,  # 🔑 CRAWLER_API_KEY

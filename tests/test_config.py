@@ -6,31 +6,36 @@ tests/test_config.py
 
 import os
 import pytest
-from xiao_qian.config import Config, KEY_XIAO_QIAN, KEY_CRAWLER
+from xiao_qian.config import Config, KEY_XIAO_QIAN, KEY_CRAWLER, KEY_SECURITY
 
 
 def test_key_identifiers():
     """確認金鑰識別名稱的常數值正確。"""
     assert KEY_XIAO_QIAN == "XIAO_QIAN_API_KEY"
     assert KEY_CRAWLER == "CRAWLER_API_KEY"
+    assert KEY_SECURITY == "SECURITY_API_KEY"
 
 
 def test_config_reads_from_env(monkeypatch):
     """Config 應從環境變數讀取 API 金鑰。"""
     monkeypatch.setenv(KEY_XIAO_QIAN, "sk-test-xq")
     monkeypatch.setenv(KEY_CRAWLER,   "craw-test")
+    monkeypatch.setenv(KEY_SECURITY,  "sec-test")
     cfg = Config()
     assert cfg.xiao_qian_api_key == "sk-test-xq"
     assert cfg.crawler_api_key   == "craw-test"
+    assert cfg.security_api_key  == "sec-test"
 
 
 def test_config_missing_keys_returns_none(monkeypatch):
     """未設定環境變數時，金鑰應為 None。"""
     monkeypatch.delenv(KEY_XIAO_QIAN, raising=False)
     monkeypatch.delenv(KEY_CRAWLER,   raising=False)
+    monkeypatch.delenv(KEY_SECURITY,  raising=False)
     cfg = Config()
     assert cfg.xiao_qian_api_key is None
     assert cfg.crawler_api_key   is None
+    assert cfg.security_api_key  is None
 
 
 def test_config_validate_raises_when_missing(monkeypatch):
@@ -46,8 +51,19 @@ def test_config_validate_passes_when_keys_set(monkeypatch):
     """validate() 在金鑰齊全時不應拋出例外。"""
     monkeypatch.setenv(KEY_XIAO_QIAN, "sk-abc")
     monkeypatch.setenv(KEY_CRAWLER,   "craw-xyz")
+    monkeypatch.setenv(KEY_SECURITY,  "sec-xyz")
     cfg = Config()
     cfg.validate()  # should not raise
+
+
+def test_config_validate_raises_when_security_key_missing(monkeypatch):
+    """validate() 在缺少 SECURITY_API_KEY 時應拋出 ValueError。"""
+    monkeypatch.setenv(KEY_XIAO_QIAN, "sk-abc")
+    monkeypatch.setenv(KEY_CRAWLER,   "craw-xyz")
+    monkeypatch.delenv(KEY_SECURITY, raising=False)
+    cfg = Config()
+    with pytest.raises(ValueError, match="SECURITY_API_KEY"):
+        cfg.validate()
 
 
 def test_config_default_db_uri():

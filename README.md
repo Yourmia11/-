@@ -20,16 +20,18 @@
 
 ## API 金鑰 🔑
 
-系統使用兩把 API 金鑰，透過**環境變數**注入（絕不硬編碼）：
+系統使用**三把** API 金鑰，透過**環境變數**注入（絕不硬編碼）：
 
 | 環境變數 | 用途 |
 |----------|------|
 | `XIAO_QIAN_API_KEY` | 🔑 小千核心對話引擎（OpenAI / 自定義 LLM） |
 | `CRAWLER_API_KEY` | 🔑 小千專屬知識爬蟲服務 |
+| `SECURITY_API_KEY` | 🔑 絕對防護模組（HMAC-SHA256 共享密鑰） |
 
 ```bash
 export XIAO_QIAN_API_KEY="sk-..."
 export CRAWLER_API_KEY="craw-..."
+export SECURITY_API_KEY="sec-..."
 ```
 
 ---
@@ -43,6 +45,7 @@ pip install -r requirements.txt
 # 設定 API 金鑰
 export XIAO_QIAN_API_KEY="sk-..."
 export CRAWLER_API_KEY="craw-..."
+export SECURITY_API_KEY="sec-..."
 
 # 啟動小千
 python main.py
