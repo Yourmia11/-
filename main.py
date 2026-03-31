@@ -27,6 +27,7 @@ import sys
 
 from xiao_qian.core import XiaoQian
 from xiao_qian.config import Config
+from xiao_qian import __version__
 
 logging.basicConfig(
     level=logging.INFO,
@@ -39,7 +40,7 @@ def main() -> None:
     xq = XiaoQian(config=config)
 
     print("=" * 60)
-    print(f"  歡迎來到小千的世界！  (版本 0.1.0)")
+    print(f"  歡迎來到小千的世界！  (版本 {__version__})")
     print("  輸入 /help 查看指令，/quit 離開。")
     print("=" * 60)
     print(xq.greet())
